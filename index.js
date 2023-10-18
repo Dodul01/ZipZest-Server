@@ -27,8 +27,23 @@ async function run() {
 
     const database = client.db('resturentDB');
     const adsCollection = database.collection('ads');
+    const productsCollection = database.collection('products');
 
-    app.get('/ads', async (req, res)=>{
+
+    app.post('/products', async (req, res) => {
+      const product = req.body;
+      const result = await productsCollection.insertOne(product);
+
+      res.send(result);
+    })
+
+    app.get('/products', async (req, res) => {
+      const cursor = productsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.get('/ads', async (req, res) => {
       const cursor = adsCollection.find();
       const result = await cursor.toArray();
       res.send(result)
@@ -46,10 +61,10 @@ run().catch(console.dir);
 
 
 
-app.get('/',(req, res)=>{
+app.get('/', (req, res) => {
   res.send('Welcome to the resturent server.')
 })
 
-app.listen(PORT, () => { 
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 })
