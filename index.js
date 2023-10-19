@@ -40,6 +40,7 @@ async function run() {
     app.get('/products', async (req, res) => {
       const cursor = productsCollection.find();
       const result = await cursor.toArray();
+
       res.send(result)
     })
 
@@ -51,20 +52,38 @@ async function run() {
       res.send(product);
     })
 
+    app.post('/myCart/:userID', async (req, res) => {
+      const userID = req.params.userID;
+      const data = req.body;
+      const userCartCollection = database.collection(userID);
+      const result = await userCartCollection.insertOne(data);
+
+      res.send(result)
+    })
+
+    app.get('/myCart/:userID', async (req, res) => {
+      const userID = req.params.userID;
+      const userCartCollection = database.collection(userID);
+      const cursor = userCartCollection.find();
+      const result = await cursor.toArray();
+
+      res.send(result)
+    })
+
     app.put('/products/:id', async (req, res) => {
       const id = req.params.id;
       const product = req.body;
-      const query = {_id: new ObjectId(id)};
-      const options = {upsert: true};
+      const query = { _id: new ObjectId(id) };
+      const options = { upsert: true };
       const updateProduct = {
-        $set:{
+        $set: {
           name: product.name,
-          brandName: product.brandName, 
-          imageURL: product.imageURL, 
-          price: product.price, 
-          ratings: product.ratings, 
-          types: product.types, 
-          description: product.description 
+          brandName: product.brandName,
+          imageURL: product.imageURL,
+          price: product.price,
+          ratings: product.ratings,
+          types: product.types,
+          description: product.description
         }
       }
       const result = await productsCollection.updateOne(query, updateProduct, options)
