@@ -8,7 +8,7 @@ app.use(express.json());
 
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://allendodul6:DA8T1L9HjlzFaLHG@cluster0.bfzpc41.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -40,6 +40,34 @@ async function run() {
     app.get('/products', async (req, res) => {
       const cursor = productsCollection.find();
       const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.get('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const product = await productsCollection.findOne(query);
+
+      res.send(product);
+    })
+
+    app.put('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const product = req.body;
+      const query = {_id: new ObjectId(id)};
+      const options = {upsert: true};
+      const updateProduct = {
+        $set:{
+          name: product.name,
+          brandName: product.brandName, 
+          imageURL: product.imageURL, 
+          price: product.price, 
+          ratings: product.ratings, 
+          types: product.types, 
+          description: product.description 
+        }
+      }
+      const result = await productsCollection.updateOne(query, updateProduct, options)
       res.send(result)
     })
 
