@@ -28,7 +28,7 @@ async function run() {
     const database = client.db('resturentDB');
     const adsCollection = database.collection('ads');
     const productsCollection = database.collection('products');
-
+    const addToCartCollection = database.collection('addToCart');
 
     app.post('/products', async (req, res) => {
       const product = req.body;
@@ -52,22 +52,32 @@ async function run() {
       res.send(product);
     })
 
-    app.post('/myCart/:userID', async (req, res) => {
-      const userID = req.params.userID;
-      const data = req.body;
-      const userCartCollection = database.collection(userID);
-      const result = await userCartCollection.insertOne(data);
+    app.post('/addToCart', async (req, res) => {
+      const cartItem = req.body;
+      const result = await addToCartCollection.insertOne(cartItem);
+      res.send(result);
+    })
 
+    app.get('/addToCart', async (req, res) => {
+      const cursor = addToCartCollection.find();
+      const result = await cursor.toArray();
+      
       res.send(result)
     })
 
-    app.get('/myCart/:userID', async (req, res) => {
-      const userID = req.params.userID;
-      const userCartCollection = database.collection(userID);
-      const cursor = userCartCollection.find();
-      const result = await cursor.toArray();
+    app.delete('/addToCart/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await addToCartCollection.deleteOne(query);
+      res.send(result);
+    })
 
-      res.send(result)
+    app.get('/addToCart/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const cartItem = await addToCartCollection.findOne(query);
+
+      res.send(cartItem);
     })
 
     app.put('/products/:id', async (req, res) => {
